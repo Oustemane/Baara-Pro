@@ -1,0 +1,1324 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Baara Pro : trouvez un ouvrier vérifié près de chez vous. Prototype créé par Ousmane CAMARA.">
+<meta name="theme-color" content="#12285A">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<title>Baara Pro</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:wght@600;800&display=swap">
+<style>
+/* Concept: une appli de poche, une colonne, gros boutons. Bleu de chantier + orange de sécurité.
+   Atkinson Hyperlegible pour lire facilement, Bricolage Grotesque pour les titres. */
+:root{
+  --font-display:'Bricolage Grotesque','Arial Narrow',system-ui,sans-serif;
+  --font-body:'Atkinson Hyperlegible',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --bg:#E8ECF3; --surface:#FFFFFF; --surface-2:#F2F5FA; --ink:#0E1B38; --muted:#55617B; --line:#D6DDE9;
+  --brand:#14295C; --hero:#12285A; --on-hero:#FFFFFF; --on-hero-muted:#B9C6E6; --hero-accent:#FFA366;
+  --accent:#D9480F; --on-accent:#FFFFFF; --accent-soft:#FDEBDD; --accent-ink:#9A3412;
+  --verif-bg:#E1EAFB; --verif-fg:#14295C;
+  --star:#E39A00; --star-off:#C5CCDB;
+  --bubble-out:#14295C; --bubble-out-ink:#FFFFFF;
+  --err:#B42318; --shadow:0 1px 2px rgba(14,27,56,.08);
+  --tile1a:#1B3A7A; --tile1b:#0E1B38; --tile2a:#C2410C; --tile2b:#7C2D12; --tile3a:#3B4A6B; --tile3b:#1E2A47;
+  --r:8px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#060C1A; --surface:#0F1A33; --surface-2:#172544; --ink:#EAF0FB; --muted:#9DABC8; --line:#263759;
+    --brand:#A9C0F5; --hero:#16306B;
+    --accent:#FF7A33; --on-accent:#1A0D03; --accent-soft:#3A2214; --accent-ink:#FFB27F;
+    --verif-bg:#1E3566; --verif-fg:#C4D5FF;
+    --star:#F5B332; --star-off:#3A4A6E;
+    --bubble-out:#2B4C9B; --err:#FF8A80; --shadow:none;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#060C1A; --surface:#0F1A33; --surface-2:#172544; --ink:#EAF0FB; --muted:#9DABC8; --line:#263759;
+  --brand:#A9C0F5; --hero:#16306B;
+  --accent:#FF7A33; --on-accent:#1A0D03; --accent-soft:#3A2214; --accent-ink:#FFB27F;
+  --verif-bg:#1E3566; --verif-fg:#C4D5FF;
+  --star:#F5B332; --star-off:#3A4A6E;
+  --bubble-out:#2B4C9B; --err:#FF8A80; --shadow:none;
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+body.home::before{background:var(--hero)}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3,p{margin:0}
+.ic{flex:0 0 auto;display:block}
+
+.app{max-width:480px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;background:var(--surface);box-shadow:0 0 0 1px var(--line)}
+.pad{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+main{flex:1;min-width:0;padding-block:18px 28px}
+
+/* En-tête */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;min-height:60px;padding-block:8px}
+.top.hero{position:static;display:block;background:var(--hero);color:var(--on-hero);border-bottom:0;padding-block:16px 22px}
+.top-title{flex:1;min-width:0;font-family:var(--font-display);font-weight:800;font-size:21px;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.icon-btn{width:44px;height:44px;flex:0 0 auto;display:grid;place-items:center;border:1px solid var(--line);border-radius:var(--r);background:var(--surface-2);color:var(--ink)}
+.top-id{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.2}
+.top-id b{font-family:var(--font-display);font-weight:800;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top-id span{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.hero-row{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.brand{font-family:var(--font-display);font-weight:800;font-size:25px;letter-spacing:-.01em;line-height:1}
+.brand small{display:block;margin-top:5px;font-family:var(--font-body);font-weight:400;font-size:12px;letter-spacing:.03em;color:var(--on-hero-muted)}
+.where{position:relative;display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 28px 0 11px;border:1px solid color-mix(in srgb,var(--on-hero) 35%,transparent);border-radius:999px;font-size:14px;font-weight:700}
+.where:focus-within{outline:3px solid var(--hero-accent);outline-offset:2px}
+.where-sel{appearance:none;-webkit-appearance:none;min-width:0;max-width:150px;padding:8px 0;border:0;background:transparent;color:inherit;font:inherit;font-weight:700;cursor:pointer}
+.where-sel:focus-visible{outline:none}
+.where-sel option{color:var(--ink);background:var(--surface)}
+.where .caret{position:absolute;right:9px;pointer-events:none}
+.brandrow{display:flex;align-items:center;gap:10px;min-width:0}
+.logo{--logo-tile:#12285A;--logo-helmet:#FF7A33;--logo-check:#12285A;flex:0 0 auto;display:block;border-radius:22%;box-shadow:0 0 0 1px var(--line)}
+.logo .lt{fill:var(--logo-tile)}
+.logo .lh{fill:var(--logo-helmet)}
+.logo .lw{fill:#FFFFFF}
+.logo .lg{fill:none;stroke:var(--logo-tile);stroke-width:.9}
+.logo .lc{fill:none;stroke:var(--logo-check);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.top.hero .logo{--logo-tile:#FF7A33;--logo-helmet:#12285A;--logo-check:#12285A;box-shadow:none}
+.hero-h{margin:24px 0 16px;font-family:var(--font-display);font-weight:800;font-size:clamp(27px,8vw,33px);line-height:1.04;letter-spacing:-.02em;text-wrap:balance}
+.hero-h span{color:var(--hero-accent)}
+.search{display:flex;gap:8px}
+.search-in{flex:1;min-width:0;height:52px;padding:0 14px;border:0;border-radius:var(--r);background:var(--surface);color:var(--ink)}
+.search-in::placeholder{color:var(--muted)}
+
+/* Boutons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;padding:0 20px;border:2px solid transparent;border-radius:var(--r);font-weight:700;font-size:16px;text-align:center}
+.btn-primary{background:var(--accent);color:var(--on-accent)}
+.btn-ghost{background:transparent;border-color:var(--line);color:var(--ink)}
+.btn-block{width:100%}
+.btn-lg{min-height:56px;font-family:var(--font-display);font-weight:800;font-size:19px}
+.btn-sm{min-height:40px;padding:0 14px;font-size:14px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.link{background:none;border:0;padding:6px 0;color:var(--accent);font-weight:700;text-decoration:underline;text-underline-offset:3px}
+
+/* Sections */
+.sec{margin-bottom:28px}
+.sec-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:12px}
+.sec-title{font-family:var(--font-display);font-weight:800;font-size:20px;letter-spacing:-.01em;margin-bottom:12px}
+.sec-head .sec-title{margin:0}
+.muted{color:var(--muted)}
+.center{text-align:center}
+.fine{font-size:13.5px;color:var(--muted);margin-top:10px}
+.lead{margin-bottom:18px;max-width:60ch}
+
+/* Métiers */
+.trades{display:grid;grid-template-columns:repeat(auto-fill,minmax(76px,1fr));gap:10px}
+.trade{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0;padding:12px 2px 10px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface-2);font-size:12px;font-weight:700;line-height:1.2;overflow-wrap:anywhere;text-align:center}
+.chipwrap{display:flex;flex-wrap:wrap;gap:8px}
+.credit{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;margin-top:20px;padding-top:16px;border-top:1px solid var(--line);font-family:var(--font-display);font-weight:800;font-size:16px;text-align:center}
+.credit span{font-family:var(--font-body);font-weight:400;font-size:14px;color:var(--muted)}
+
+/* Choix du type de compte et espace entreprise */
+.band-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.band-btns .btn{padding:8px 10px;line-height:1.2}
+.choices{display:flex;flex-direction:column;gap:12px}
+.choice{display:flex;align-items:center;gap:14px;width:100%;padding:16px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface-2);text-align:left}
+.choice-ic{display:grid;place-items:center;width:52px;height:52px;flex:0 0 auto;border-radius:var(--r);background:var(--accent-soft);color:var(--accent-ink)}
+.choice-tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.choice-tx b{font-family:var(--font-display);font-weight:800;font-size:19px}
+.choice-tx span{font-size:14px;color:var(--muted)}
+.choice>.ic{color:var(--muted)}
+.avatar.co{border-radius:var(--r)}
+.fav-btn{margin-bottom:24px}
+.fav-btn[aria-pressed="true"]{border-color:var(--star)}
+.fav-btn[aria-pressed="true"] .ic{fill:var(--star);stroke:var(--star)}
+.team{display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.member{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);font-weight:700}
+.member span{margin-left:auto;font-weight:400;font-size:13.5px;color:var(--muted)}
+.team-add{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+
+/* Espace administrateur */
+.pill{display:inline-block;padding:2px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent-ink);font-size:12.5px;font-weight:700}
+.who{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px;font-weight:700}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:26px}
+.stat{display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:0;padding:12px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface-2);text-align:left}
+.stat b{font-family:var(--font-display);font-weight:800;font-size:30px;line-height:1;font-variant-numeric:tabular-nums}
+.stat span{font-size:13px;color:var(--muted)}
+.stat.hot{background:var(--accent-soft);border-color:var(--accent)}
+.stat.hot span{color:var(--accent-ink)}
+.bars{display:flex;flex-direction:column;gap:8px}
+.bar-row{display:grid;grid-template-columns:minmax(84px,130px) minmax(0,1fr) 28px;gap:10px;align-items:center;font-size:14px}
+.bar-l{overflow-wrap:anywhere;line-height:1.2}
+.bar{display:block;height:10px;border-radius:5px;background:var(--surface-2);border:1px solid var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--brand)}
+.bar-n{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+.pend{padding:14px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface);box-shadow:var(--shadow)}
+.pend-head{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.pend-id{display:flex;flex-direction:column;min-width:0;font-size:14px;color:var(--muted)}
+.pend-id b{font-family:var(--font-display);font-weight:800;font-size:18px;color:var(--ink);overflow-wrap:anywhere}
+.docs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.doc{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:13px;font-weight:700}
+.doc.ok{background:var(--verif-bg);color:var(--verif-fg)}
+.doc.no{background:var(--accent-soft);color:var(--accent-ink)}
+.pend-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.afilters{grid-template-columns:minmax(0,1fr) minmax(0,1.5fr)}
+.arow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+.arow-main{display:flex;flex-direction:column;min-width:0;font-size:13.5px;color:var(--muted)}
+.arow-main b{font-size:15.5px;color:var(--ink);overflow-wrap:anywhere}
+.arow-act{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.state{padding:2px 9px;border-radius:999px;background:var(--verif-bg);color:var(--verif-fg);font-size:12.5px;font-weight:700}
+.state.off{background:var(--accent-soft);color:var(--accent-ink)}
+.trade-ic{display:grid;place-items:center;width:48px;height:48px;border-radius:var(--r);background:var(--surface);color:var(--brand);border:1px solid var(--line)}
+.trade:hover,.trade:focus-visible{border-color:var(--accent)}
+
+/* Cartes d'ouvriers */
+.list{display:flex;flex-direction:column;gap:10px}
+.card{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;width:100%;padding:12px;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.card:hover{border-color:var(--accent)}
+.avatar{display:grid;place-items:center;width:50px;height:50px;border-radius:50%;background:var(--verif-bg);color:var(--verif-fg);font-family:var(--font-display);font-weight:800;font-size:18px;letter-spacing:.02em;flex:0 0 auto}
+.avatar.big{width:76px;height:76px;font-size:27px}
+.avatar.sm{width:40px;height:40px;font-size:15px}
+.card-main{display:flex;flex-direction:column;gap:2px;min-width:0}
+.card-name{font-family:var(--font-display);font-weight:800;font-size:18px;line-height:1.15;overflow-wrap:anywhere}
+.card-sub{font-size:14.5px;color:var(--muted)}
+.card-meta{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:4px;font-size:13px;color:var(--muted)}
+.card-rate{display:flex;flex-direction:column;align-items:flex-end;gap:2px;font-size:13px;color:var(--muted)}
+.rate-num{font-family:var(--font-display);font-weight:800;font-size:19px;color:var(--ink);line-height:1}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 9px 2px 6px;border-radius:999px;background:var(--verif-bg);color:var(--verif-fg);font-size:12.5px;font-weight:700;white-space:nowrap}
+.new{padding:3px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent-ink);font-size:13px;font-weight:700}
+.stars{position:relative;display:inline-block;font-size:15px;line-height:1;letter-spacing:1px;color:var(--star-off);white-space:nowrap}
+.stars::before{content:"★★★★★"}
+.stars i{position:absolute;inset:0 auto 0 0;width:var(--p);overflow:hidden;color:var(--star);font-style:normal;white-space:nowrap}
+.stars i::before{content:"★★★★★"}
+
+/* Bandeau ouvrier */
+.join-band{padding:18px;border-radius:var(--r);background:var(--accent-soft);color:var(--ink)}
+.join-band h2{font-family:var(--font-display);font-weight:800;font-size:21px;margin-bottom:6px}
+.join-band p{margin-bottom:14px;max-width:46ch}
+
+/* Filtres et résultats */
+.filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:14px}
+.filters .field{margin:0;min-width:0}
+.qchip{margin-bottom:12px;font-size:15px}
+.count{margin-bottom:10px;font-size:14.5px;color:var(--muted)}
+.empty{padding:24px 16px;border:1px dashed var(--line);border-radius:var(--r);text-align:center}
+.empty h3{font-family:var(--font-display);font-weight:800;font-size:19px;margin-bottom:6px}
+.empty p{margin-bottom:14px;color:var(--muted)}
+
+/* Formulaires */
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.field label{font-weight:700;font-size:15px}
+.help{font-size:13.5px;color:var(--muted)}
+.err{font-size:14px;font-weight:700;color:var(--err)}
+.input{width:100%;min-height:48px;padding:0 12px;border:1.5px solid var(--line);border-radius:var(--r);background:var(--surface-2);color:var(--ink)}
+textarea.input{min-height:110px;padding:10px 12px;resize:vertical;line-height:1.4}
+.input:focus{border-color:var(--accent)}
+select.input{padding-right:8px;font-size:15px}
+input[type=file].input{padding:10px;font-size:14px}
+input[type=file]::file-selector-button{margin-right:10px;padding:8px 12px;border:0;border-radius:6px;background:var(--accent);color:var(--on-accent);font-weight:700;cursor:pointer}
+
+/* Étapes */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:18px 0 20px}
+.step{display:flex;flex-direction:column;gap:6px;font-size:13.5px;color:var(--muted)}
+.step i{display:block;height:6px;border-radius:3px;background:var(--line)}
+.step.done i{background:var(--brand)}
+.step.now i{background:var(--accent)}
+.step.now,.step.done{color:var(--ink);font-weight:700}
+
+/* Profil */
+.p-head{display:flex;gap:14px;align-items:center;margin-bottom:14px}
+.p-name{font-family:var(--font-display);font-weight:800;font-size:26px;line-height:1.05;letter-spacing:-.015em;overflow-wrap:anywhere}
+.p-sub{margin:4px 0 6px;color:var(--muted)}
+.rate-line{display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:14px;color:var(--muted)}
+.rate-line b{font-family:var(--font-display);font-weight:800;font-size:19px;color:var(--ink)}
+.verif{display:flex;align-items:flex-start;gap:10px;margin-bottom:24px;padding:12px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface-2);font-size:14px;color:var(--muted)}
+.verif .badge{margin-top:1px}
+.bio{max-width:60ch}
+.exp-line{margin-top:6px;font-weight:700}
+.gallery{display:flex;gap:10px;overflow-x:auto;padding-bottom:8px;scroll-snap-type:x mandatory}
+.tile{position:relative;flex:0 0 156px;height:116px;margin:0;border-radius:var(--r);overflow:hidden;scroll-snap-align:start;color:#fff;background:linear-gradient(135deg,var(--tile1a),var(--tile1b))}
+.tile.t1{background:linear-gradient(135deg,var(--tile2a),var(--tile2b))}
+.tile.t2{background:linear-gradient(135deg,var(--tile3a),var(--tile3b))}
+.tile-ic{position:absolute;right:8px;top:8px;opacity:.28}
+.tile figcaption{position:absolute;left:0;right:0;bottom:0;padding:18px 10px 8px;font-size:13.5px;font-weight:700;line-height:1.2;background:linear-gradient(transparent,rgba(0,0,0,.55))}
+.review{padding:12px 0;border-top:1px solid var(--line)}
+.rv-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:4px}
+.rv-top b{overflow-wrap:anywhere}
+.rate-cta{margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
+.rate-cta p{margin-bottom:10px}
+
+/* Messagerie */
+.note{padding:10px 12px;border-radius:var(--r);background:var(--accent-soft);color:var(--accent-ink);font-size:14px;margin-bottom:14px}
+.msgs{display:flex;flex-direction:column;gap:8px}
+.bubble{max-width:82%;padding:9px 12px;border-radius:14px;overflow-wrap:anywhere;line-height:1.35}
+.bubble.out{align-self:flex-end;background:var(--bubble-out);color:var(--bubble-out-ink);border-bottom-right-radius:4px}
+.bubble.in{align-self:flex-start;background:var(--surface-2);border:1px solid var(--line);border-bottom-left-radius:4px}
+.bubble .t{display:block;margin-top:2px;font-size:11.5px;opacity:.7;font-variant-numeric:tabular-nums}
+.bubble.typing{color:var(--muted);font-style:italic}
+.composer{display:flex;gap:8px;align-items:center}
+.composer .input{flex:1;min-width:0}
+.send{width:48px;height:48px;flex:0 0 auto;display:grid;place-items:center;border:0;border-radius:var(--r);background:var(--accent);color:var(--on-accent)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px}
+.chip{flex:0 0 auto;padding:8px 14px;border:1px solid var(--line);border-radius:999px;background:var(--surface-2);font-size:14px}
+.chip:hover{border-color:var(--accent)}
+.conv .card-sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.conv .when{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* Note */
+.starpick{display:flex;gap:4px;margin:6px 0 4px}
+.starpick button{width:54px;height:54px;padding:0;border:0;background:none;font-size:42px;line-height:1;color:var(--star-off)}
+.starpick button.on{color:var(--star)}
+.rate-label{min-height:24px;margin-bottom:16px;font-weight:700}
+
+/* Barre du bas */
+.dock{position:sticky;bottom:0;z-index:5;padding-top:8px;padding-bottom:calc(8px + env(safe-area-inset-bottom,0px));background:var(--surface);border-top:1px solid var(--line)}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:56px;padding:4px;border:0;border-radius:var(--r);background:none;color:var(--muted);font-size:12.5px;font-weight:700;line-height:1.1;text-align:center}
+.tab.on{color:var(--accent);background:var(--accent-soft)}
+.toast{position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom,0px));z-index:20;transform:translateX(-50%);max-width:min(92vw,420px);padding:11px 16px;border-radius:var(--r);background:var(--ink);color:var(--surface);font-weight:700;text-align:center}
+
+@media (prefers-reduced-motion: reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+
+</head>
+<body>
+<div class="app">
+  <header class="top pad" id="top"></header>
+  <main class="pad" id="screen"></main>
+  <div class="dock pad" id="dock" hidden></div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script>
+(function(){
+'use strict';
+
+/* ---------- Outils ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const norm=s=>String(s).normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim();
+const fr=n=>n.toFixed(1).replace('.',',');
+const now=()=>new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+const initials=n=>n.split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+
+const P={
+  soudeur:'<circle cx="12" cy="12" r="2.5"/><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/>',
+  macon:'<path d="M3 6h18v5H3zM3 13h18v5H3zM9 6v5M15 6v5M6 13v5M12 13v5M18 13v5"/>',
+  menuisier:'<path d="M5 4v16h15M5 9h3M5 14h3M10 20v-3M15 20v-3"/>',
+  ferrailleur:'<path d="M3 8h18M3 12h18M3 16h18M8 5v14M16 5v14"/>',
+  plombier:'<path d="M3 8h10a4 4 0 0 1 4 4v8M2 6v4M14 20h6"/>',
+  electricien:'<path d="M13 3L5 14h6l-1 7 8-11h-6z"/>',
+  peintre:'<path d="M5 4h12v5H5zM17 6.5h2.5v4H12v3M10.5 13.5h3v7h-3z"/>',
+  carreleur:'<path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/>',
+  home:'<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  chat:'<path d="M4 5h16v11H9l-5 4z"/>',
+  casque:'<path d="M4 15a8 8 0 0 1 16 0M2 15h20v3H2zM12 7v3"/>',
+  pin:'<path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/>',
+  shield:'<path d="M12 3l7 3v5c0 5-3 8.5-7 10-4-1.5-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/>',
+  back:'<path d="M15 5l-7 7 7 7"/>',
+  send:'<path d="M4 12l16-8-6 16-3-7z"/>',
+  search:'<circle cx="11" cy="11" r="6"/><path d="M16 16l4 4"/>',
+  cuve:'<path d="M5 7a7 3 0 0 1 14 0v10a7 3 0 0 1-14 0z"/><path d="M5 7a7 3 0 0 0 14 0"/>',
+  cle:'<circle cx="8" cy="15" r="3.5"/><path d="M10.5 12.5L20 3M16 7l2.5 2.5M13 10l2 2"/>',
+  toit:'<path d="M3 12l9-8 9 8M5 10.5V20h14v-9.5"/>',
+  echafaud:'<path d="M5 3v18M19 3v18M5 8h14M5 14h14M5 20h14M5 8l14 6M5 14l14 6"/>',
+  engin:'<path d="M6 21V4h2M6 7h13M19 7v6M17 13h4v3h-4zM3 21h8"/>',
+  froid:'<path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9"/>',
+  soleil:'<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/>',
+  vitre:'<path d="M5 4h14v16H5zM12 4v16M5 12h14"/>',
+  outil:'<path d="M15 4a4.5 4.5 0 0 0-4.2 6.1L4 17l3 3 6.9-6.8A4.5 4.5 0 0 0 20 9l-3 3-2.5-.5L14 9l3-3z"/>',
+  brouette:'<path d="M4 8h12l-2.5 7h-7z"/><circle cx="10" cy="19" r="1.8"/><path d="M16 8l4-2M13.5 15l6-3"/>',
+  liste:'<path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/>',
+  bas:'<path d="M6 9l6 6 6-6"/>',
+  stats:'<path d="M5 20V11M12 20V5M19 20v-7"/>',
+  building:'<path d="M4 21V4h10v17M14 10h6v11M2 21h20M8 8h2M8 12h2M8 16h2M17 14h.01M17 18h.01"/>',
+  star:'<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
+  next:'<path d="M9 5l7 7-7 7"/>'
+};
+const ic=(k,s)=>`<svg class="ic" width="${s||24}" height="${s||24}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[k]}</svg>`;
+
+/* ---------- Données d'exemple ---------- */
+/* Chaque métier : [identifiant, nom, pluriel, icône facultative] */
+const BRANCHES=[
+  {id:'gros',nom:`Gros œuvre`,ic:'macon',m:[
+    ['macon',`Maçon`,`Maçons`],['ferrailleur',`Ferrailleur`,`Ferrailleurs`],['coffreur',`Coffreur`,`Coffreurs`,'menuisier'],
+    ['charpentier',`Charpentier`,`Charpentiers`,'toit'],['couvreur',`Couvreur`,`Couvreurs`,'toit'],
+    ['terrassier',`Terrassier`,`Terrassiers`,'engin'],['echafaudeur',`Échafaudeur`,`Échafaudeurs`,'echafaud']]},
+  {id:'metaux',nom:`Métaux`,ic:'soudeur',m:[
+    ['soudeur',`Soudeur`,`Soudeurs`],['chaudronnier',`Chaudronnier`,`Chaudronniers`,'cuve'],
+    ['metallier',`Métallier`,`Métalliers`,'ferrailleur'],['serrurier',`Serrurier`,`Serruriers`,'cle'],
+    ['tuyauteur',`Tuyauteur`,`Tuyauteurs`,'plombier']]},
+  {id:'bois',nom:`Bois et vitrerie`,ic:'menuisier',m:[
+    ['menuisier',`Menuisier`,`Menuisiers`],['menuisier_alu',`Menuisier aluminium`,`Menuisiers aluminium`,'vitre'],
+    ['ebeniste',`Ébéniste`,`Ébénistes`],['vitrier',`Vitrier`,`Vitriers`,'vitre']]},
+  {id:'eau',nom:`Électricité, eau et froid`,ic:'electricien',m:[
+    ['electricien',`Électricien`,`Électriciens`],['plombier',`Plombier`,`Plombiers`],
+    ['frigoriste',`Frigoriste`,`Frigoristes`,'froid'],['solaire',`Technicien solaire`,`Techniciens solaires`,'soleil']]},
+  {id:'finitions',nom:`Finitions`,ic:'peintre',m:[
+    ['peintre',`Peintre`,`Peintres`],['carreleur',`Carreleur`,`Carreleurs`],
+    ['plaquiste',`Plaquiste`,`Plaquistes`,'carreleur'],['platrier',`Plâtrier`,`Plâtriers`,'macon']]},
+  {id:'engins',nom:`Mécanique et engins`,ic:'outil',m:[
+    ['mecanicien',`Mécanicien auto`,`Mécaniciens auto`],['meca_engins',`Mécanicien d'engins`,`Mécaniciens d'engins`],
+    ['elec_auto',`Électricien auto`,`Électriciens auto`,'electricien'],['conducteur',`Conducteur d'engins`,`Conducteurs d'engins`,'engin'],
+    ['grutier',`Grutier`,`Grutiers`,'engin']]},
+  {id:'aides',nom:`Aides et manœuvres`,ic:'brouette',m:[
+    ['manoeuvre',`Manœuvre`,`Manœuvres`],['aide_macon',`Aide-maçon`,`Aides-maçons`],
+    ['aide_ferrailleur',`Aide-ferrailleur`,`Aides-ferrailleurs`],['aide_soudeur',`Aide-soudeur`,`Aides-soudeurs`],
+    ['aide_menuisier',`Aide-menuisier`,`Aides-menuisiers`],['aide_electricien',`Aide-électricien`,`Aides-électriciens`],
+    ['aide_plombier',`Aide-plombier`,`Aides-plombiers`],['aide_peintre',`Aide-peintre`,`Aides-peintres`],
+    ['aide_carreleur',`Aide-carreleur`,`Aides-carreleurs`],['aide_mecanicien',`Aide-mécanicien`,`Aides-mécaniciens`]]}
+];
+const METIERS=BRANCHES.flatMap(b=>b.m.map(t=>({id:t[0],nom:t[1],pl:t[2],ic:t[3]||b.ic,g:b.id})));
+const POPULAR=['soudeur','macon','menuisier','ferrailleur','electricien','plombier','peintre'].map(id=>METIERS.find(m=>m.id===id));
+/* Villes et quartiers (exemples à corriger avec les gens du pays) */
+const VILLES=[
+  {id:'san-pedro',nom:`San Pedro`,q:[`Balmer`,`Bardot`,`Cité`,`Lac`,`Séwéké`,`Zimbabwe`]},
+  {id:'abidjan',nom:`Abidjan`,q:[`Abobo`,`Adjamé`,`Cocody`,`Koumassi`,`Marcory`,`Plateau`,`Port-Bouët`,`Treichville`,`Yopougon`]},
+  {id:'bouake',nom:`Bouaké`,q:[`Air France`,`Belleville`,`Commerce`,`Dar-es-Salaam`,`Koko`,`N'Gattakro`,`Nimbo`]},
+  {id:'yamoussoukro',nom:`Yamoussoukro`,q:[`Assabou`,`Dioulakro`,`Habitat`,`Morofé`,`N'Zuessy`]},
+  {id:'daloa',nom:`Daloa`,q:[`Gbeuliville`,`Lobia`,`Orly`,`Tazibouo`]},
+  {id:'korhogo',nom:`Korhogo`,q:[`Banaforo`,`Haoussabougou`,`Koko`,`Soba`]}
+];
+const villeObj=id=>VILLES.find(v=>v.id===id)||VILLES[0];
+const deVille=v=>/^[AEIOUÉ]/.test(v.nom)?`d'${v.nom}`:`de ${v.nom}`;
+const quartierOpts=vid=>`<option value="">Choisir</option>`+villeObj(vid).q.map(q=>`<option value="${esc(q)}">${esc(q)}</option>`).join('');
+
+const OUVRIERS=[
+  {id:1,nom:`Koffi Yao`,metier:'soudeur',quartier:'Bardot',note:4.8,nb:23,exp:9,
+   bio:`Portails, grilles et charpentes métalliques. Je travaille à l'arc et au poste semi-automatique. Devis gratuit sur place.`,
+   chantiers:[`Portail coulissant`,`Charpente de hangar`,`Grille de fenêtre`],
+   avis:[[`Mme Diarra`,5,`Portail livré à la date promise. Les soudures sont propres.`],[`Sarl Océan Bâtiment`,5,`Sérieux sur le chantier, il a bien suivi le plan.`]]},
+  {id:2,nom:`Séverin Gnahoré`,metier:'soudeur',quartier:'Cité',note:4.5,nb:14,exp:6,
+   bio:`Réparation de portes, remorques et escaliers en fer. Je me déplace avec mon propre poste à souder.`,
+   chantiers:[`Escalier en fer`,`Remorque réparée`,`Porte de garage`],
+   avis:[[`M. Tano`,5,`A réparé ma remorque en une matinée.`],[`Awa K.`,4,`Bon travail, un peu en retard le premier jour.`]]},
+  {id:3,nom:`Ibrahim Sanogo`,metier:'soudeur',quartier:'Balmer',note:4.2,nb:7,exp:3,
+   bio:`Soudure sur fer et sur aluminium. Je cherche des chantiers réguliers à San Pedro.`,
+   chantiers:[`Cadre de fenêtre`,`Support de citerne`,`Barrière`],
+   avis:[[`M. Koffi`,4,`Travail correct pour le prix.`],[`Mme Bamba`,4,`Poli et à l'heure.`]]},
+  {id:4,nom:`Mamadou Sanogo`,metier:'macon',quartier:'Séwéké',note:4.7,nb:31,exp:12,
+   bio:`Fondations, murs en briques de ciment, dalles et crépissage. J'encadre une équipe de quatre personnes.`,
+   chantiers:[`Mur de clôture`,`Dalle de terrasse`,`Façade crépie`],
+   avis:[[`M. Aka`,5,`Mur de clôture droit et solide, fini avant la pluie.`],[`Mme Soro`,5,`Équipe propre, chantier rangé chaque soir.`]]},
+  {id:5,nom:`Bernard Kouadio`,metier:'macon',quartier:'Lac',note:4.3,nb:11,exp:7,
+   bio:`Petits travaux de maçonnerie, réparations, fosses et caniveaux.`,
+   chantiers:[`Caniveau`,`Réparation de mur`,`Fosse septique`],
+   avis:[[`M. Zadi`,4,`A bien réparé le mur de la cour.`],[`Mme Konan`,4,`Prix honnête, travail correct.`]]},
+  {id:6,nom:`Désiré Tapé`,metier:'menuisier',quartier:'Cité',note:4.9,nb:18,exp:15,
+   bio:`Portes, fenêtres, armoires et lits sur mesure, en bois local. Finition soignée.`,
+   chantiers:[`Armoire sur mesure`,`Porte en bois`,`Cuisine équipée`],
+   avis:[[`Mme Kouamé`,5,`Armoire magnifique, exactement comme je voulais.`],[`M. Yao`,5,`Très soigneux et honnête sur le prix.`]]},
+  {id:7,nom:`Joël Zadi`,metier:'menuisier',quartier:'Zimbabwe',note:4.2,nb:8,exp:5,
+   bio:`Charpentes de toit, portes et meubles simples.`,
+   chantiers:[`Charpente de toit`,`Porte de chambre`,`Table et bancs`],
+   avis:[[`M. Diabaté`,4,`Charpente bien posée.`],[`Mme Tapé`,4,`Bon artisan, il faut le prévenir à l'avance.`]]},
+  {id:8,nom:`Aïcha Soro`,metier:'peintre',quartier:'Balmer',note:4.6,nb:16,exp:7,
+   bio:`Peinture intérieure et extérieure, enduit et finitions. Je conseille sur le choix des couleurs.`,
+   chantiers:[`Salon repeint`,`Façade extérieure`,`Enduit de mur`],
+   avis:[[`M. Gbané`,5,`Maison repeinte en trois jours, sans taches.`],[`Mme Ouattara`,4,`Très propre, bons conseils sur les couleurs.`]]},
+  {id:9,nom:`Landry Bamba`,metier:'ferrailleur',quartier:'Zimbabwe',note:4.6,nb:19,exp:10,
+   bio:`Ferraillage de dalles, de poteaux et de fondations, selon le plan de l'ingénieur.`,
+   chantiers:[`Ferraillage de dalle`,`Poteaux d'immeuble`,`Semelles de fondation`],
+   avis:[[`Sarl Océan Bâtiment`,5,`Ferraillage conforme au plan, contrôlé sans remarque.`],[`M. Aka`,4,`Équipe rapide.`]]},
+  {id:10,nom:`Yves Aka`,metier:'ferrailleur',quartier:'Bardot',note:4.0,nb:5,exp:2,
+   bio:`Je ferraille les dalles et les poteaux de petites maisons.`,
+   chantiers:[`Dalle de maison`,`Poteaux`,`Chaînage`],
+   avis:[[`M. Tra`,4,`Travail correct.`],[`Mme Dago`,4,`Ponctuel.`]]},
+  {id:11,nom:`Clément Dago`,metier:'electricien',quartier:'Lac',note:4.7,nb:27,exp:8,
+   bio:`Installation électrique de maisons neuves, dépannage, tableaux et prises.`,
+   chantiers:[`Tableau électrique`,`Câblage de maison`,`Éclairage extérieur`],
+   avis:[[`Mme Koné`,5,`A trouvé la panne en dix minutes.`],[`M. Bamba`,5,`Installation propre et bien expliquée.`]]},
+  {id:12,nom:`Rodrigue Ouattara`,metier:'plombier',quartier:'Séwéké',note:4.4,nb:13,exp:6,
+   bio:`Salles de bain, réparation de fuites, pose de citernes.`,
+   chantiers:[`Salle de bain`,`Pose de citerne`,`Réparation de fuite`],
+   avis:[[`M. Soro`,4,`Fuite réparée le jour même.`],[`Mme Gbané`,5,`Salle de bain bien installée.`]]},
+  {id:13,nom:`Gaston N'Guessan`,metier:'carreleur',quartier:'Cité',note:4.5,nb:9,exp:6,
+   bio:`Pose de carreaux au sol et au mur, salles de bain et terrasses.`,
+   chantiers:[`Sol de salon`,`Mur de salle de bain`,`Terrasse`],
+   avis:[[`Mme Tapé`,5,`Joints réguliers, sol bien plat.`],[`M. Yao`,4,`Bon travail.`]]},
+  {id:14,nom:`Souleymane Cissé`,metier:'aide_soudeur',quartier:'Bardot',note:4.4,nb:6,exp:2,
+   bio:`Aide-soudeur : je prépare les pièces, je meule, je tiens les pièces à la pose et je range le chantier. Je veux apprendre auprès d'un bon soudeur.`,
+   chantiers:[`Meulage de portail`,`Préparation de charpente`,`Pose de grille`],
+   avis:[[`Atelier Yao`,5,`Travailleur et attentif, il apprend vite.`],[`M. Diomandé`,4,`Bien en équipe.`]]},
+  {id:15,nom:`Kévin Zoro`,metier:'aide_macon',quartier:'Séwéké',note:4.5,nb:12,exp:3,
+   bio:`Aide-maçon : mélange du béton, transport des briques, aide à la pose et au coulage des dalles.`,
+   chantiers:[`Coulage de dalle`,`Pose de briques`,`Préparation du mortier`],
+   avis:[[`M. Aka`,5,`Courageux, toujours à l'heure.`],[`Mme Soro`,4,`Bon aide, il écoute bien.`]]},
+  {id:16,nom:`Ali Bakayoko`,metier:'manoeuvre',quartier:'Lac',note:4.3,nb:9,exp:4,
+   bio:`Manœuvre à la journée : déchargement, terrassement à la main, nettoyage de chantier.`,
+   chantiers:[`Chargement de sable`,`Nettoyage de chantier`,`Tranchée creusée`],
+   avis:[[`Sarl Océan Bâtiment`,4,`Fiable à la journée.`],[`M. Zadi`,5,`Il travaille sans qu'on le pousse.`]]},
+  {id:17,nom:`Fabrice Kra`,metier:'aide_electricien',quartier:'Cité',note:4.2,nb:4,exp:1,
+   bio:`Aide-électricien : tirage de câbles, saignées et pose de prises sous la direction d'un électricien.`,
+   chantiers:[`Tirage de câbles`,`Saignées dans un mur`,`Pose de prises`],
+   avis:[[`M. Dago`,4,`Sérieux, il apprend vite.`],[`Mme Koné`,4,`Poli et propre.`]]},
+  {id:18,nom:`Moïse Ahoussou`,metier:'mecanicien',quartier:'Zimbabwe',note:4.6,nb:21,exp:11,
+   bio:`Mécanicien auto : vidange, freins, suspension, diagnostic. Je me déplace pour les pannes simples.`,
+   chantiers:[`Changement de freins`,`Réparation de moteur`,`Révision complète`],
+   avis:[[`M. Tano`,5,`A trouvé la panne rapidement.`],[`Mme Bamba`,4,`Prix honnête.`]]},
+  {id:19,nom:`Bakary Silué`,metier:'frigoriste',quartier:'Cité',note:4.5,nb:10,exp:5,
+   bio:`Installation et réparation de climatiseurs et de congélateurs. Entretien pour boutiques et bureaux.`,
+   chantiers:[`Pose de climatiseur`,`Recharge de gaz`,`Chambre froide`],
+   avis:[[`Mme Konan`,5,`Climatiseur posé proprement.`],[`Boutique du Port`,4,`Dépannage rapide.`]]},
+  {id:20,nom:`Olivier Tchagba`,metier:'charpentier',quartier:'Balmer',note:4.4,nb:8,exp:6,
+   bio:`Charpentes de toit en bois et en fer, pose de toiture.`,
+   chantiers:[`Charpente de villa`,`Toit de hangar`,`Réparation de toit`],
+   avis:[[`M. Aka`,4,`Toit solide après la saison des pluies.`],[`Mme Kouamé`,5,`Soigneux.`]]},
+  {id:21,nom:`Dramane Sidibé`,metier:'conducteur',quartier:'Lac',note:4.7,nb:15,exp:9,
+   bio:`Conducteur de pelle et de chargeuse. Terrassement, nivellement et chargement.`,
+   chantiers:[`Terrassement de parcelle`,`Chargement de camions`,`Nivellement`],
+   avis:[[`Sarl Océan Bâtiment`,5,`Précis et prudent sur le chantier.`],[`M. Zadi`,4,`Machine bien conduite.`]]},
+  {id:22,nom:`Antoine Boli`,metier:'serrurier',quartier:'Bardot',note:4.3,nb:7,exp:4,
+   bio:`Serrures, portes blindées, clés et cadenas. Dépannage si vous êtes enfermé dehors.`,
+   chantiers:[`Porte blindée`,`Changement de serrure`,`Grille de sécurité`],
+   avis:[[`Mme Diarra`,4,`Venu en vingt minutes.`],[`M. Tra`,5,`Serrure neuve bien posée.`]]},
+  {id:23,nom:`Mariam Ouédraogo`,metier:'aide_peintre',quartier:'Balmer',note:4.1,nb:3,exp:1,
+   bio:`Aide-peintre : ponçage, enduit, protection des sols et nettoyage.`,
+   chantiers:[`Ponçage de mur`,`Protection des sols`,`Enduit de plafond`],
+   avis:[[`Mme Soro`,4,`Soigneuse et rapide.`],[`M. Gbané`,4,`Bonne aide.`]]},
+  {id:24,nom:`Pascal Yapi`,metier:'couvreur',quartier:'Séwéké',note:4.5,nb:9,exp:7,
+   bio:`Pose de tôles et de tuiles, réparation de fuites de toit, gouttières.`,
+   chantiers:[`Toit en tôle`,`Gouttière`,`Réparation de fuite`],
+   avis:[[`M. Soro`,5,`Plus de fuite depuis la réparation.`],[`Mme Konan`,4,`Travail propre.`]]}
+];
+let nextId=100;
+
+/* Les 24 ouvriers ci-dessus sont à San Pedro. On en fabrique d'autres pour chaque autre ville. */
+OUVRIERS.forEach(o=>{o.ville='san-pedro';});
+(function(){
+  const PRE=['Serge','Thierry','Franck','Ismaël','Lassina','Seydou','Drissa','Salif','Karim','Kader','Éric','Christian','Hervé','Josué','Noël','Patrice','Alex','Martial','Ange','Jean-Paul','Rémi','Cédric','Ibrahima','Léon','Guy'];
+  const NOM=['Kouassi','Konan','Yéo','Fofana','Diaby','Doumbia','Touré','Soro','Tanoh','Aké','Ehui','Brou','Gnamien','Boka','Loba','Koulibaly','Bogui','Zahui','Gouro','Dié','Tahi','Kobenan','Gnagne','Ouraga','Lago'];
+  const base=OUVRIERS.slice();
+  let c=0, id=200;
+  VILLES.slice(1).forEach((v,k)=>{
+    base.forEach(b=>{
+      if(((b.id*37+(k+1)*17)%10)>=4) return;
+      const n=c++;
+      const note=Math.min(4.9,Math.max(3.9,Math.round((b.note+(((b.id*7+k*3)%5)-2)/10)*10)/10));
+      OUVRIERS.push(Object.assign({},b,{
+        id:id++,ville:v.id,
+        nom:`${PRE[n%25]} ${NOM[(n*7+3+Math.floor(n/25)*5)%25]}`,
+        quartier:v.q[(b.id+k)%v.q.length],
+        note,nb:Math.max(3,b.nb+((b.id*(k+1))%7)-3),
+        chantiers:b.chantiers.slice(),avis:b.avis.map(a=>a.slice())
+      }));
+    });
+  });
+})();
+const QUICK=[`Bonjour, vous êtes disponible cette semaine ?`,`Quel est votre prix pour ce travail ?`,`Pouvez-vous passer voir le chantier ?`];
+
+/* ---------- État ---------- */
+const filters={metier:'',quartier:'',min:'0',q:''};
+const chats={};
+let me=null;          // compte ouvrier créé dans le prototype
+let co=null;          // compte entreprise créé dans le prototype
+let joinType='';      // '', 'ouvrier' ou 'entreprise'
+let nextCoId=10;
+const SECTEURS=[['btp',`BTP et construction`],['industrie',`Industrie et usine`],['transport',`Port, transport et logistique`],['hotel',`Hôtellerie et restauration`],['commerce',`Commerce`],['agri',`Agriculture`],['services',`Services et entretien`],['autre',`Autre`]];
+const secteurNom=id=>(SECTEURS.find(s=>s[0]===id)||[id,id])[1];
+/* Entreprises déjà vérifiées (noms inventés pour la démonstration) */
+const ENTREPRISES=[
+  {id:1,nom:`Atelier du Sud (exemple)`,secteur:'btp',ville:'abidjan',resp:`Mamadou Koné`},
+  {id:2,nom:`Hôtel Les Palmiers (exemple)`,secteur:'hotel',ville:'bouake',resp:`Fanta Bamba`}
+];
+let rateN=0;
+let cur={view:'home',params:{}};
+let stack=[];
+
+const byId=id=>OUVRIERS.find(o=>o.id===id);
+const metierNom=id=>(METIERS.find(m=>m.id===id)||{nom:id}).nom;
+const iconOf=id=>(METIERS.find(m=>m.id===id)||{}).ic||'casque';
+let joinPrefill='';
+let ville='san-pedro';
+let joinVille='';
+const metierOptions=(sel,all)=>(all?`<option value="">${all}</option>`:'')
+  +BRANCHES.map(b=>`<optgroup label="${esc(b.nom)}">${b.m.map(t=>`<option value="${t[0]}"${sel===t[0]?' selected':''}>${esc(t[1])}</option>`).join('')}</optgroup>`).join('');
+const chat=id=>chats[id]||(chats[id]={msgs:[],typing:false});
+const resetFilters=()=>{filters.metier='';filters.quartier='';filters.min='0';filters.q=''};
+
+/* ---------- Petits blocs ---------- */
+const badge=()=>`<span class="badge">${ic('shield',14)}Vérifié</span>`;
+const logo=s=>`<svg class="logo" width="${s}" height="${s}" viewBox="0 0 40 40" role="img" aria-label="Logo Baara Pro"><rect class="lt" width="40" height="40" rx="9"/><rect class="lh" x="18" y="12" width="4" height="13" rx="1.6"/><path class="lh" d="M9 25a11 11 0 0 1 22 0z"/><path class="lg" d="M17.55 14.5V25M22.45 14.5V25"/><rect class="lh" x="5.5" y="25" width="29" height="4" rx="2"/><circle class="lt" cx="31.5" cy="29.5" r="6.6"/><circle class="lw" cx="31.5" cy="29.5" r="5.2"/><path class="lc" d="M29 29.6l1.95 1.9 3.3-3.9"/></svg>`;
+const stars=n=>`<span class="stars" style="--p:${(n/5*100).toFixed(0)}%" role="img" aria-label="Note ${fr(n)} sur 5"><i></i></span>`;
+const tradeTile=m=>`<button class="trade" data-act="trade" data-id="${m.id}"><span class="trade-ic">${ic(m.ic,28)}</span><span>${m.nom}</span></button>`;
+const tile=(o,c,i)=>`<figure class="tile t${i%3}"><span class="tile-ic">${ic(iconOf(o.metier),64)}</span><figcaption>${esc(c)}</figcaption></figure>`;
+const review=a=>`<article class="review"><div class="rv-top"><b>${esc(a[0])}</b>${stars(a[1])}</div>${a[2]?`<p>${esc(a[2])}</p>`:''}</article>`;
+
+function card(o){
+  const rating=o.nb>0
+    ?`<span class="rate-num">${fr(o.note)}</span>${stars(o.note)}<span>${o.nb} avis</span>`
+    :`<span class="new">Nouveau</span>`;
+  return `<button class="card" data-act="open" data-id="${o.id}">
+    <span class="avatar">${esc(initials(o.nom))}</span>
+    <span class="card-main">
+      <span class="card-name">${esc(o.nom)}</span>
+      <span class="card-sub">${metierNom(o.metier)} · ${esc(o.quartier)}</span>
+      <span class="card-meta">${badge()}${o.exp!=null?`<span>${o.exp} ans</span>`:''}</span>
+    </span>
+    <span class="card-rate">${rating}</span>
+  </button>`;
+}
+
+const backBtn=()=>stack.length?`<button class="icon-btn" data-act="back" aria-label="Retour">${ic('back')}</button>`:'';
+const titleBar=(t,extra)=>`${backBtn()}<h1 class="top-title">${esc(t)}</h1>${extra||''}`;
+
+function tabsHtml(active){
+  const T=[['home','Accueil','home'],['messages','Messages','chat'],['join','Mon compte','casque']];
+  return `<div class="tabs">${T.map(t=>`<button class="tab${t[0]===active?' on':''}" data-act="tab" data-view="${t[0]}"${t[0]===active?' aria-current="page"':''}>${ic(t[2],24)}<span>${t[1]}</span></button>`).join('')}</div>`;
+}
+
+/* ---------- Navigation ---------- */
+function go(view,params,opts){
+  if(!(opts&&opts.replace)) stack.push(cur);
+  cur={view,params:params||{}};
+  render();
+}
+function tab(view){stack=[];cur={view,params:{}};render();}
+function back(){cur=stack.pop()||{view:'home',params:{}};render();}
+
+/* ---------- Écran 1 : accueil ---------- */
+function vHome(){
+  const best=OUVRIERS.filter(o=>o.nb>0&&o.ville===ville&&!o.suspendu).sort((a,b)=>b.note-a.note||b.nb-a.nb).slice(0,3);
+  return {
+    top:`<div class="hero-row">
+        <div class="brandrow">${logo(46)}<div class="brand">Baara Pro<small>baara = travail, en dioula</small></div></div>
+        <label class="where">${ic('pin',16)}<select id="villeSel" class="where-sel" aria-label="Choisir la ville">${VILLES.map(v=>`<option value="${v.id}"${v.id===ville?' selected':''}>${esc(v.nom)}</option>`).join('')}</select><span class="caret">${ic('bas',14)}</span></label>
+      </div>
+      <h1 class="hero-h">Trouvez un ouvrier de confiance <span>à ${esc(villeObj(ville).nom)}</span></h1>
+      <form id="searchForm" class="search" role="search">
+        <input id="q" class="search-in" type="search" placeholder="Soudeur, maçon…" aria-label="Chercher un métier ou un nom" autocomplete="off">
+        <button class="btn btn-primary" type="submit">${ic('search',20)}Chercher</button>
+      </form>`,
+    body:`<section class="sec">
+        <h2 class="sec-title">Choisir un métier</h2>
+        <div class="trades">${POPULAR.map(tradeTile).join('')}<button class="trade" data-act="metiers"><span class="trade-ic">${ic('liste',28)}</span><span>Tous les métiers</span></button></div>
+      </section>
+      <section class="sec">
+        <h2 class="sec-title">Aides et manœuvres</h2>
+        <p class="muted" style="margin-bottom:10px">Pour travailler avec un ouvrier ou à la journée.</p>
+        <div class="chipwrap">${METIERS.filter(m=>m.g==='aides').map(m=>`<button class="chip" data-act="trade" data-id="${m.id}">${m.nom}</button>`).join('')}</div>
+      </section>
+      <section class="sec">
+        <div class="sec-head"><h2 class="sec-title">Les mieux notés</h2><button class="link" data-act="all">Voir tous</button></div>
+        <div class="list">${best.map(card).join('')}</div>
+      </section>
+      <section class="join-band">
+        <h2>Créez votre compte gratuit</h2>
+        <p>Ouvriers : les clients ${deVille(villeObj(ville))} pourront vous trouver et vous écrire. Entreprises : trouvez des ouvriers vérifiés et contactez-les avec votre équipe.</p>
+        <div class="band-btns"><button class="btn btn-primary" data-act="jtype" data-t="ouvrier">Je suis ouvrier</button><button class="btn btn-ghost" data-act="jtype" data-t="entreprise">Je suis une entreprise</button></div>
+      </section>
+      <p class="fine">Prototype pour tester l'idée. Les ouvriers, les photos et les avis sont des exemples.</p>
+      <p class="credit">${logo(28)}<span class="credit-name">Baara Pro</span> <span>créé par</span> Ousmane CAMARA</p>
+      <p class="center"><button class="link" data-act="alogin">Espace administrateur</button></p>`,
+    dock:tabsHtml('home')
+  };
+}
+
+/* ---------- Écran 2 : liste ---------- */
+function listTitle(){
+  const m=METIERS.find(x=>x.id===filters.metier);
+  return m?m.pl:(filters.q?'Résultats':'Tous les ouvriers');
+}
+function filtered(){
+  let nq=norm(filters.q);
+  if(nq.length>3) nq=nq.replace(/s$/,'');
+  const min=Number(filters.min);
+  return OUVRIERS.filter(o=>
+    o.ville===ville&&!o.suspendu&&
+    (!filters.metier||o.metier===filters.metier)&&
+    (!filters.quartier||o.quartier===filters.quartier)&&
+    ((o.nb>0?o.note:0)>=min)&&
+    (!nq||norm(o.nom+' '+metierNom(o.metier)+' '+o.quartier).includes(nq))
+  ).sort((a,b)=>(b.nb>0?b.note:0)-(a.nb>0?a.note:0)||b.nb-a.nb);
+}
+function resultsHtml(){
+  const l=filtered();
+  if(!l.length){
+    const m=METIERS.find(x=>x.id===filters.metier);
+    if(m&&!filters.q&&!OUVRIERS.some(o=>o.metier===m.id&&o.ville===ville&&!o.suspendu)){
+      const n=m.nom.toLowerCase();
+      return `<div class="empty"><h3>Pas encore de profil</h3><p>Aucun ${esc(n)} n'est inscrit à ${esc(villeObj(ville).nom)} pour l'instant. Vous faites ce métier ? Soyez le premier.</p><button class="btn btn-primary" data-act="joinAs" data-id="${m.id}">Créer mon profil</button></div>`;
+    }
+  }
+  if(!l.length) return `<div class="empty"><h3>Aucun ouvrier trouvé</h3><p>Essayez un autre quartier ou une note plus basse.</p><button class="btn btn-ghost" data-act="reset">Tout afficher</button></div>`;
+  return `<p class="count">${l.length} ouvrier${l.length>1?'s':''} à ${esc(villeObj(ville).nom)}, triés par note</p><div class="list">${l.map(card).join('')}</div>`;
+}
+function vList(){
+  const opt=(v,l,sel)=>`<option value="${esc(v)}"${sel?' selected':''}>${esc(l)}</option>`;
+  return {
+    top:titleBar(listTitle()),
+    body:`<div class="filters">
+        <div class="field"><label for="fMetier">Métier</label>
+          <select id="fMetier" class="input" data-filter="metier">${metierOptions(filters.metier,'Tous')}</select></div>
+        <div class="field"><label for="fQuartier">Quartier</label>
+          <select id="fQuartier" class="input" data-filter="quartier">${opt('','Tous',!filters.quartier)}${villeObj(ville).q.map(q=>opt(q,q,filters.quartier===q)).join('')}</select></div>
+        <div class="field"><label for="fMin">Note</label>
+          <select id="fMin" class="input" data-filter="min">${opt('0','Toutes',filters.min==='0')}${opt('4','4 et +',filters.min==='4')}${opt('4.5','4,5 et +',filters.min==='4.5')}</select></div>
+      </div>
+      ${filters.q?`<p class="qchip">Recherche : <b>${esc(filters.q)}</b> <button class="link" data-act="clearq">Effacer</button></p>`:''}
+      <div id="results">${resultsHtml()}</div>`,
+    dock:tabsHtml('home')
+  };
+}
+
+/* ---------- Tous les métiers, par branche ---------- */
+function vMetiers(){
+  return {
+    top:titleBar('Tous les métiers'),
+    body:`<p class="lead">${METIERS.length} métiers, rangés par branche. Touchez un métier pour voir les ouvriers.</p>`
+      +BRANCHES.map(b=>`<section class="sec"><h2 class="sec-title">${esc(b.nom)}</h2><div class="trades">${b.m.map(t=>tradeTile(METIERS.find(x=>x.id===t[0]))).join('')}</div></section>`).join(''),
+    dock:tabsHtml('home')
+  };
+}
+
+/* ---------- Écran 3 : profil ---------- */
+const coEnt=()=>co&&co.coId?ENTREPRISES.find(e=>e.id===co.coId):null;
+const coOk=()=>!!(co&&co.status==='verifie'&&!(coEnt()||{}).suspendu);
+const favBtn=id=>{
+  const on=co.fav.includes(id);
+  return `<button class="btn btn-ghost btn-block fav-btn" data-act="fav" data-id="${id}" aria-pressed="${on}">${ic('star',20)}${on?'Dans mes favoris':'Ajouter à mes favoris'}</button>`;
+};
+function vProfile(id){
+  const o=byId(id); if(!o) return null;
+  const first=o.nom.split(' ')[0];
+  const rating=o.nb>0
+    ?`<span class="rate-line"><b>${fr(o.note)}</b>${stars(o.note)}<span>${o.nb} avis</span></span>`
+    :`<span class="new">Nouveau</span>`;
+  const photos=o.chantiers.length
+    ?`<div class="gallery">${o.chantiers.map((c,i)=>tile(o,c,i)).join('')}</div>${o.mine?'':`<p class="fine">Photos d'exemple pour la démonstration.</p>`}`
+    :`<p class="muted">Pas encore de photos.</p>`;
+  return {
+    top:titleBar('Profil'),
+    body:`<div class="p-head">
+        <span class="avatar big">${esc(initials(o.nom))}</span>
+        <div><h2 class="p-name">${esc(o.nom)}</h2>
+          <p class="p-sub">${metierNom(o.metier)} · ${esc(o.quartier)}, ${esc(villeObj(o.ville).nom)}</p>${rating}</div>
+      </div>
+      <div class="verif">${badge()}<span>Pièce d'identité contrôlée par l'équipe Baara Pro. Elle n'est jamais montrée aux clients.</span></div>
+      ${coOk()?favBtn(o.id):''}
+      <section class="sec"><h3 class="sec-title">À propos</h3>
+        <p class="bio">${esc(o.bio)}</p>${o.exp!=null?`<p class="exp-line">${o.exp} ans d'expérience</p>`:''}</section>
+      <section class="sec"><h3 class="sec-title">Photos de chantiers</h3>${photos}</section>
+      <section class="sec"><h3 class="sec-title">Avis des clients</h3>
+        ${o.avis.length?o.avis.map(review).join(''):`<p class="muted">Aucun avis pour le moment.</p>`}
+        <div class="rate-cta"><p>Vous avez travaillé avec ${esc(first)} ?</p>
+          <button class="btn btn-ghost" data-act="rate" data-id="${o.id}">Donner une note</button></div></section>`,
+    dock:`<button class="btn btn-primary btn-block btn-lg" data-act="contact" data-id="${o.id}">${ic('chat',22)}Contacter ${esc(first)}</button>`
+  };
+}
+
+/* ---------- Écran 4 : messagerie ---------- */
+function bubbles(c,o){
+  const first=o.nom.split(' ')[0];
+  if(!c.msgs.length&&!c.typing) return `<p class="muted center">Écrivez à ${esc(first)}. Dites ce que vous voulez faire et où.</p>`;
+  return c.msgs.map(m=>`<div class="bubble ${m.from==='me'?'out':'in'}">${esc(m.text)}<span class="t">${m.t}</span></div>`).join('')
+    +(c.typing?`<div class="bubble in typing">${esc(first)} écrit…</div>`:'');
+}
+function vChat(id){
+  const o=byId(id); if(!o) return null;
+  const c=chat(id);
+  const first=o.nom.split(' ')[0];
+  const sent=c.msgs.some(m=>m.from==='me');
+  return {
+    top:`${backBtn()}<span class="avatar sm">${esc(initials(o.nom))}</span>
+      <div class="top-id"><b>${esc(o.nom)}</b><span>${metierNom(o.metier)} · ${esc(o.quartier)}</span></div>
+      <button class="btn btn-ghost btn-sm" data-act="rate" data-id="${o.id}">Noter</button>`,
+    body:`${coOk()?`<p class="who"><span class="badge">${ic('shield',14)}Entreprise vérifiée</span><span>Vous écrivez au nom de ${esc(co.nom)}</span></p>`:''}<p class="note">Démonstration : les réponses de ${esc(first)} sont simulées.</p>
+      <div class="msgs" id="msgs">${bubbles(c,o)}</div>`,
+    dock:`${sent?'':`<div class="chips" id="chips">${QUICK.map(q=>`<button class="chip" data-act="quick" data-text="${esc(q)}">${esc(q)}</button>`).join('')}</div>`}
+      <form id="chatForm" class="composer" autocomplete="off">
+        <input id="chatInput" class="input" type="text" maxlength="500" placeholder="Écrire un message" aria-label="Votre message">
+        <button class="send" type="submit" aria-label="Envoyer">${ic('send',22)}</button>
+      </form>`
+  };
+}
+function replyFor(text){
+  const t=norm(text);
+  if(/prix|tarif|combien|cout/.test(t)) return `Ça dépend du chantier. Envoyez-moi le lieu et ce qu'il y a à faire, et je vous donne un prix.`;
+  if(/disponible|libre|semaine|quand/.test(t)) return `Oui, je suis libre à partir de lundi. C'est dans quel quartier ?`;
+  if(/passer|chantier|visite|voir/.test(t)) return `Oui, je peux passer demain matin voir le chantier.`;
+  return `Bonjour ! Dites-moi ce dont vous avez besoin et où se trouve le chantier.`;
+}
+function refreshChat(id){
+  if(cur.view==='chat'&&cur.params.id===id){
+    const o=byId(id), c=chat(id), box=$('#msgs');
+    if(box){
+      box.innerHTML=bubbles(c,o);
+      const chips=$('#chips'); if(chips&&c.msgs.some(m=>m.from==='me')) chips.remove();
+      window.scrollTo({top:document.documentElement.scrollHeight});
+    }
+  } else if(cur.view==='messages'){ render(); }
+}
+function sendMsg(id,text){
+  text=String(text||'').trim(); if(!text) return;
+  const c=chat(id);
+  c.msgs.push({from:'me',text,t:now()});
+  c.typing=true;
+  refreshChat(id);
+  setTimeout(()=>{
+    c.msgs.push({from:'them',text:replyFor(text),t:now()});
+    c.typing=false;
+    refreshChat(id);
+  },1200);
+}
+function vMessages(){
+  const ids=Object.keys(chats).map(Number).filter(i=>chats[i].msgs.length&&byId(i));
+  ids.sort((a,b)=>chats[b].msgs.length-chats[a].msgs.length);
+  const body=ids.length
+    ?`<div class="list">${ids.map(i=>{
+        const o=byId(i), last=chats[i].msgs[chats[i].msgs.length-1];
+        return `<button class="card conv" data-act="chat" data-id="${i}">
+          <span class="avatar">${esc(initials(o.nom))}</span>
+          <span class="card-main"><span class="card-name">${esc(o.nom)}</span><span class="card-sub">${esc(last.text)}</span></span>
+          <span class="when">${last.t}</span></button>`;
+      }).join('')}</div>`
+    :`<div class="empty"><h3>Aucune conversation</h3><p>Choisissez un métier, ouvrez un profil et touchez « Contacter ».</p><button class="btn btn-primary" data-act="tab" data-view="home">Trouver un ouvrier</button></div>`;
+  return {top:titleBar('Messages'),body,dock:tabsHtml('messages')};
+}
+
+/* ---------- Écran 5 : mon compte (ouvrier ou entreprise) ---------- */
+const joinBack=t=>`<button class="icon-btn" data-act="jtype" data-t="" aria-label="Retour">${ic('back')}</button><h1 class="top-title">${esc(t)}</h1>`;
+function vJoin(){
+  if(joinType==='ouvrier') return me?vJoinStatus():vJoinWorker();
+  if(joinType==='entreprise') return co?vCoStatus():vJoinCo();
+  if(me&&!co) return vJoinStatus();
+  if(co&&!me) return vCoStatus();
+  return vJoinChoice();
+}
+function vJoinChoice(){
+  const wTxt=me?(me.status==='verifie'?`Profil vérifié`:me.status==='refuse'?`Profil refusé`:`Profil en vérification`):`Je cherche du travail. Les clients me trouvent et m'écrivent.`;
+  const cTxt=co?(co.status==='verifie'?`Entreprise vérifiée`:co.status==='refuse'?`Compte refusé`:`Compte en vérification`):`Je cherche des ouvriers pour mon entreprise, avec mon équipe.`;
+  return {
+    top:titleBar('Mon compte'),
+    body:`<p class="lead">Quel compte voulez-vous ? Les deux sont gratuits et vérifiés par l'équipe Baara Pro.</p>
+      <div class="choices">
+        <button class="choice" data-act="jtype" data-t="ouvrier"><span class="choice-ic">${ic('casque',30)}</span><span class="choice-tx"><b>${me?'Mon profil ouvrier':'Je suis ouvrier'}</b><span>${wTxt}</span></span>${ic('next',20)}</button>
+        <button class="choice" data-act="jtype" data-t="entreprise"><span class="choice-ic">${ic('building',30)}</span><span class="choice-tx"><b>${co?'Mon entreprise':'Je suis une entreprise'}</b><span>${cTxt}</span></span>${ic('next',20)}</button>
+      </div>`,
+    dock:tabsHtml('join')
+  };
+}
+function vJoinWorker(){
+  const jv=joinVille||ville;
+  return {
+    top:joinBack('Devenir ouvrier'),
+    body:`<p class="lead">Créez votre profil gratuit. Les clients de votre ville pourront vous trouver et vous écrire dans l'application.</p>
+      <form id="joinForm" novalidate>
+        <div class="field"><label for="jNom">Nom complet</label>
+          <input id="jNom" name="nom" class="input" type="text" autocomplete="name" maxlength="60">
+          <p class="err" data-for="nom" hidden>Écrivez votre nom.</p></div>
+        <div class="field"><label for="jMetier">Votre métier</label>
+          <select id="jMetier" name="metier" class="input"><option value="">Choisir</option>${metierOptions(joinPrefill)}</select>
+          <p class="err" data-for="metier" hidden>Choisissez votre métier.</p></div>
+        <div class="field"><label for="jVille">Votre ville</label>
+          <select id="jVille" name="ville" class="input">${VILLES.map(v=>`<option value="${v.id}"${v.id===jv?' selected':''}>${esc(v.nom)}</option>`).join('')}</select></div>
+        <div class="field"><label for="jQuartier">Votre quartier</label>
+          <select id="jQuartier" name="quartier" class="input">${quartierOpts(jv)}</select>
+          <p class="err" data-for="quartier" hidden>Choisissez votre quartier.</p></div>
+        <div class="field"><label for="jTel">Numéro de téléphone</label>
+          <input id="jTel" name="tel" class="input" type="tel" inputmode="tel" autocomplete="tel" placeholder="07 00 00 00 00">
+          <p class="help">Seule l'équipe Baara Pro le voit. Les clients vous écrivent dans l'application.</p>
+          <p class="err" data-for="tel" hidden>Écrivez votre numéro de téléphone.</p></div>
+        <div class="field"><label for="jPiece">Photo de votre pièce d'identité</label>
+          <input id="jPiece" name="piece" class="input" type="file" accept="image/*">
+          <p class="help">Elle sert à confirmer que c'est bien vous. Les clients ne la voient jamais.</p>
+          <p class="err" data-for="piece" hidden>Ajoutez la photo de votre pièce d'identité.</p></div>
+        <div class="field"><label for="jPhotos">Photos de vos chantiers</label>
+          <input id="jPhotos" name="photos" class="input" type="file" accept="image/*" multiple>
+          <p class="help">Ajoutez trois photos ou plus. Les clients les voient sur votre profil.</p></div>
+        <button class="btn btn-primary btn-block btn-lg" type="submit">Envoyer mon profil</button>
+        <p class="fine">Prototype : rien n'est envoyé. Les photos restent sur votre téléphone.</p>
+      </form>`,
+    dock:tabsHtml('join')
+  };
+}
+function vJoinStatus(){
+  if(me.status==='refuse') return {
+    top:titleBar('Devenir ouvrier'),
+    body:`<h2 class="sec-title">Profil refusé</h2>
+      <p class="lead">Motif : ${esc(me.reason||'Autre raison')}. Corrigez ce point, puis envoyez votre profil de nouveau.</p>
+      <button class="btn btn-primary btn-block" data-act="retry">Corriger et renvoyer</button>`,
+    dock:tabsHtml('join')
+  };
+  const v=me.status==='verifie';
+  const S=[['Envoyé','done'],['Vérification',v?'done':'now'],['Vérifié',v?'done':'todo']];
+  const o=v?byId(me.workerId):null;
+  return {
+    top:titleBar('Devenir ouvrier'),
+    body:`<h2 class="sec-title">${v?'Votre profil est vérifié':'Profil envoyé'}</h2>
+      <p class="lead">${v?`Les clients ${deVille(villeObj(me.ville))} peuvent maintenant vous trouver, avec le badge Vérifié.`:`Nous vérifions votre pièce d'identité et vos photos. Votre profil apparaît dans la recherche dès qu'il est validé.`}</p>
+      <div class="steps" aria-label="Étapes">${S.map(s=>`<div class="step ${s[1]}"><i></i><span>${s[0]}</span></div>`).join('')}</div>
+      ${v
+        ?`<div class="list" style="margin-bottom:16px">${card(o)}</div>
+           <button class="btn btn-primary btn-block" data-act="seeMine">Voir dans la recherche</button>`
+        :`<p class="note">Démonstration : touchez le bouton pour valider votre profil. Vous pouvez aussi le valider ou le refuser depuis l'espace administrateur, en bas de l'accueil.</p>
+           <button class="btn btn-primary btn-block" data-act="validate">Valider mon profil (démo)</button>`}`,
+    dock:tabsHtml('join')
+  };
+}
+
+/* ---------- Compte entreprise ---------- */
+function vJoinCo(){
+  const jv=joinVille||ville;
+  return {
+    top:joinBack('Compte entreprise'),
+    body:`<p class="lead">Créez le compte de votre entreprise. Une fois vérifié, vous pouvez chercher des ouvriers, les garder en favoris et ajouter vos collègues.</p>
+      <form id="coForm" novalidate>
+        <div class="field"><label for="cNom">Nom de l'entreprise</label>
+          <input id="cNom" name="nom" class="input" type="text" autocomplete="organization" maxlength="60">
+          <p class="err" data-for="nom" hidden>Écrivez le nom de l'entreprise.</p></div>
+        <div class="field"><label for="cSecteur">Domaine d'activité</label>
+          <select id="cSecteur" name="secteur" class="input"><option value="">Choisir</option>${SECTEURS.map(s=>`<option value="${s[0]}">${esc(s[1])}</option>`).join('')}</select>
+          <p class="err" data-for="secteur" hidden>Choisissez le domaine d'activité.</p></div>
+        <div class="field"><label for="cVille">Ville</label>
+          <select id="cVille" name="ville" class="input">${VILLES.map(v=>`<option value="${v.id}"${v.id===jv?' selected':''}>${esc(v.nom)}</option>`).join('')}</select></div>
+        <div class="field"><label for="cResp">Nom du responsable</label>
+          <input id="cResp" name="resp" class="input" type="text" autocomplete="name" maxlength="60" placeholder="Le chef d'entreprise ou le responsable">
+          <p class="help">C'est lui qui gère le compte et ajoute les collègues.</p>
+          <p class="err" data-for="resp" hidden>Écrivez le nom du responsable.</p></div>
+        <div class="field"><label for="cTel">Numéro de téléphone</label>
+          <input id="cTel" name="tel" class="input" type="tel" inputmode="tel" autocomplete="tel" placeholder="07 00 00 00 00">
+          <p class="help">Seule l'équipe Baara Pro le voit.</p>
+          <p class="err" data-for="tel" hidden>Écrivez un numéro de téléphone.</p></div>
+        <div class="field"><label for="cDoc">Document de l'entreprise</label>
+          <input id="cDoc" name="doc" class="input" type="file" accept="image/*,application/pdf">
+          <p class="help">Registre de commerce, carte professionnelle ou toute pièce qui prouve que l'entreprise existe. Les ouvriers ne la voient jamais.</p>
+          <p class="err" data-for="doc" hidden>Ajoutez un document de l'entreprise.</p></div>
+        <button class="btn btn-primary btn-block btn-lg" type="submit">Envoyer pour vérification</button>
+        <p class="fine">Prototype : rien n'est envoyé. Le document reste sur votre téléphone.</p>
+      </form>`,
+    dock:tabsHtml('join')
+  };
+}
+function coHeader(){
+  return `<div class="p-head"><span class="avatar big co">${ic('building',34)}</span>
+      <div><h2 class="p-name" style="font-size:23px">${esc(co.nom)}</h2><p class="p-sub">${esc(secteurNom(co.secteur))} · ${esc(villeObj(co.ville).nom)}</p>
+        ${co.status==='verifie'?`<span class="badge">${ic('shield',14)}Entreprise vérifiée</span>`:''}</div></div>`;
+}
+function coFavsHtml(){
+  const l=co.fav.map(byId).filter(o=>o&&!o.suspendu);
+  return l.length
+    ?`<div class="list">${l.map(card).join('')}</div>`
+    :`<div class="empty"><h3>Aucun favori</h3><p>Ouvrez le profil d'un ouvrier et touchez « Ajouter à mes favoris ». Vous le retrouvez ici.</p><button class="btn btn-primary" data-act="tab" data-view="home">Trouver des ouvriers</button></div>`;
+}
+function teamHtml(){
+  return `<div class="team">
+      <div class="member">${esc(co.resp)}<span>Responsable</span></div>
+      ${co.team.map(n=>`<div class="member">${esc(n)}<span>Collègue</span></div>`).join('')}
+    </div>`;
+}
+function vCoStatus(){
+  const top=titleBar('Mon entreprise');
+  if(co.status==='refuse') return {
+    top,
+    body:`<h2 class="sec-title">Compte refusé</h2>
+      <p class="lead">Motif : ${esc(co.reason||'Autre raison')}. Corrigez ce point, puis envoyez le compte de nouveau.</p>
+      <button class="btn btn-primary btn-block" data-act="retryCo">Corriger et renvoyer</button>`,
+    dock:tabsHtml('join')
+  };
+  if(co.status!=='verifie'){
+    const S=[['Envoyé','done'],['Vérification','now'],['Vérifié','todo']];
+    return {
+      top,
+      body:`${coHeader()}
+        <h2 class="sec-title">Compte envoyé</h2>
+        <p class="lead">Nous vérifions le document de l'entreprise. Dès que c'est fait, votre entreprise reçoit le badge « Entreprise vérifiée » et vous pouvez contacter les ouvriers en son nom.</p>
+        <div class="steps" aria-label="Étapes">${S.map(s=>`<div class="step ${s[1]}"><i></i><span>${s[0]}</span></div>`).join('')}</div>
+        <p class="note">Démonstration : touchez le bouton pour valider le compte. Vous pouvez aussi le valider ou le refuser depuis l'espace administrateur, en bas de l'accueil.</p>
+        <button class="btn btn-primary btn-block" data-act="validateCo">Valider mon compte (démo)</button>`,
+      dock:tabsHtml('join')
+    };
+  }
+  if(!coOk()) return {
+    top,
+    body:`${coHeader()}
+      <h2 class="sec-title">Compte suspendu</h2>
+      <p class="lead">L'équipe Baara Pro a suspendu ce compte. Vous ne pouvez plus contacter les ouvriers pour le moment.</p>`,
+    dock:tabsHtml('join')
+  };
+  return {
+    top,
+    body:`${coHeader()}
+      <button class="btn btn-primary btn-block btn-lg" data-act="tab" data-view="home" style="margin-bottom:26px">${ic('search',22)}Trouver des ouvriers</button>
+      <section class="sec"><h2 class="sec-title">Mes ouvriers favoris</h2>${coFavsHtml()}</section>
+      <section class="sec"><h2 class="sec-title">Mon équipe</h2>
+        <p class="muted" style="margin-bottom:12px">Ajoutez vos collègues. Ils contactent les ouvriers au nom de ${esc(co.nom)}.</p>
+        <div id="teamBox">${teamHtml()}</div>
+        <form id="teamForm" class="team-add" autocomplete="off">
+          <input id="tName" class="input" type="text" maxlength="50" placeholder="Nom du collègue" aria-label="Nom du collègue">
+          <button class="btn btn-ghost" type="submit">Ajouter</button>
+        </form>
+        <p class="fine">Prototype : dans la vraie application, chaque collègue reçoit une invitation sur son téléphone.</p></section>`,
+    dock:tabsHtml('join')
+  };
+}
+
+/* ---------- Écran 6 : note ---------- */
+const LABELS=['',`Pas satisfait`,`Moyen`,`Correct`,`Bien`,`Excellent`];
+function vRate(id){
+  const o=byId(id); if(!o) return null;
+  const first=o.nom.split(' ')[0];
+  return {
+    top:titleBar('Donner une note'),
+    body:`<div class="p-head"><span class="avatar">${esc(initials(o.nom))}</span>
+        <div><h2 class="p-name" style="font-size:22px">${esc(o.nom)}</h2><p class="p-sub" style="margin:2px 0 0">${metierNom(o.metier)} · ${esc(o.quartier)}</p></div></div>
+      <form id="rateForm">
+        <h3 class="sec-title" style="margin-top:8px">Comment s'est passé le travail avec ${esc(first)} ?</h3>
+        <div class="starpick" role="radiogroup" aria-label="Votre note de 1 à 5">
+          ${[1,2,3,4,5].map(n=>`<button type="button" role="radio" aria-checked="false" aria-label="${n} sur 5" data-act="star" data-n="${n}">★</button>`).join('')}
+        </div>
+        <p class="rate-label" id="rateLabel" aria-live="polite"></p>
+        <div class="field"><label for="rComment">Votre commentaire (facultatif)</label>
+          <textarea id="rComment" class="input" maxlength="300" placeholder="Le travail était-il propre ? À l'heure ?"></textarea></div>
+        <button id="rateSubmit" class="btn btn-primary btn-block btn-lg" type="submit" disabled>Envoyer mon avis</button>
+      </form>`,
+    dock:''
+  };
+}
+function setStars(n){
+  rateN=n;
+  document.querySelectorAll('.starpick button').forEach((b,i)=>{
+    b.classList.toggle('on',i<n);
+    b.setAttribute('aria-checked',String(i+1===n));
+  });
+  const l=$('#rateLabel'); if(l) l.textContent=LABELS[n]||'';
+  const s=$('#rateSubmit'); if(s) s.disabled=n<1;
+}
+
+/* ---------- Espace administrateur (démonstration) ---------- */
+let admin=false;
+const af={ville:'',q:''};
+const REASONS=[`Photo de la pièce d'identité illisible`,`Photos de chantiers manquantes`,`Informations incomplètes`,`Autre raison`];
+/* Profils reçus et pas encore vérifiés (exemples). Celui que vous envoyez dans « Je suis ouvrier » s'ajoute ici. */
+const PENDING=[
+  {id:'p1',nom:`Théodore Ahui`,metier:'electricien',ville:'san-pedro',quartier:'Cité',tel:'07 00 00 00 01',photos:3},
+  {id:'p2',nom:`Rokia Diomandé`,metier:'peintre',ville:'abidjan',quartier:'Cocody',tel:'05 00 00 00 02',photos:5},
+  {id:'p3',nom:`Cheick Sylla`,metier:'soudeur',ville:'bouake',quartier:'Koko',tel:'01 00 00 00 03',photos:2},
+  {id:'p4',nom:`Évariste Gba`,metier:'aide_macon',ville:'daloa',quartier:'Lobia',tel:'07 00 00 00 04',photos:0},
+  {id:'p5',type:'entreprise',nom:`Bâtir Sud (exemple)`,secteur:'btp',ville:'san-pedro',resp:`Karim Touré`,tel:'07 00 00 00 05'},
+  {id:'p6',type:'entreprise',nom:`Port Services (exemple)`,secteur:'transport',ville:'san-pedro',resp:`Awa Coulibaly`,tel:'05 00 00 00 06'}
+];
+const COREASONS=[`Document de l'entreprise illisible`,`Entreprise introuvable`,`Informations incomplètes`,`Autre raison`];
+
+function approve(pid){
+  const p=PENDING.find(x=>x.id===pid); if(!p) return null;
+  if(p.type==='entreprise'){
+    const e={id:nextCoId++,kind:'entreprise',nom:p.nom,secteur:p.secteur,ville:p.ville,resp:p.resp,mine:!!p.mine};
+    ENTREPRISES.push(e);
+    PENDING.splice(PENDING.indexOf(p),1);
+    if(p.mine&&co){co.status='verifie';co.coId=e.id;}
+    return e;
+  }
+  const o={id:nextId++,nom:p.nom,metier:p.metier,ville:p.ville,quartier:p.quartier,note:0,nb:0,exp:null,mine:true,
+    bio:`Nouveau sur Baara Pro.`,
+    chantiers:Array.from({length:Math.min(p.photos,6)},(_,i)=>`Photo ${i+1}`),avis:[]};
+  OUVRIERS.push(o);
+  PENDING.splice(PENDING.indexOf(p),1);
+  if(p.mine&&me){me.status='verifie';me.workerId=o.id;}
+  return o;
+}
+function reject(pid,reason){
+  const p=PENDING.find(x=>x.id===pid); if(!p) return;
+  PENDING.splice(PENDING.indexOf(p),1);
+  if(p.type==='entreprise'){ if(p.mine&&co){co.status='refuse';co.reason=reason;} return; }
+  if(p.mine&&me){me.status='refuse';me.reason=reason;}
+}
+
+function adminTabs(active){
+  const n=PENDING.length;
+  const T=[['resume',`Résumé`,'stats'],['verifier',`À vérifier`,'shield'],['ouvriers',`Ouvriers`,'casque'],['entreprises',`Entreprises`,'building']];
+  return `<div class="tabs" style="grid-template-columns:repeat(4,minmax(0,1fr))">${T.map(t=>`<button class="tab${t[0]===active?' on':''}" data-act="atab" data-tab="${t[0]}"${t[0]===active?' aria-current="page"':''}>${ic(t[2],24)}<span>${t[1]}${t[0]==='verifier'&&n?` (${n})`:''}</span></button>`).join('')}</div>`;
+}
+function vAdminLogin(){
+  return {
+    top:titleBar('Espace administrateur'),
+    body:`<p class="lead">Cet espace est réservé à l'équipe Baara Pro. Il sert à vérifier les nouveaux ouvriers et les nouvelles entreprises, et à gérer les comptes.</p>
+      <form id="adminForm" novalidate>
+        <div class="field"><label for="aCode">Code d'accès</label>
+          <input id="aCode" class="input" type="password" autocomplete="off">
+          <p class="help">Démonstration : le code est BAARA. Dans la vraie application, ce sera un vrai compte avec un mot de passe, créé pour vous seul.</p>
+          <p class="err" id="aErr" hidden>Code incorrect. Essayez encore.</p></div>
+        <button class="btn btn-primary btn-block btn-lg" type="submit">Entrer</button>
+      </form>`,
+    dock:''
+  };
+}
+function resumeHtml(){
+  const vis=OUVRIERS.filter(o=>!o.suspendu);
+  const entVis=ENTREPRISES.filter(e=>!e.suspendu).length;
+  const susp=(OUVRIERS.length-vis.length)+(ENTREPRISES.length-entVis);
+  const byV=VILLES.map(v=>[v.nom,vis.filter(o=>o.ville===v.id).length]);
+  const byB=BRANCHES.map(b=>[b.nom,vis.filter(o=>(METIERS.find(m=>m.id===o.metier)||{}).g===b.id).length]);
+  const bars=rows=>{
+    const mx=Math.max(1,...rows.map(r=>r[1]));
+    return `<div class="bars">${rows.map(r=>`<div class="bar-row"><span class="bar-l">${esc(r[0])}</span><span class="bar"><i style="width:${(r[1]/mx*100).toFixed(0)}%"></i></span><span class="bar-n">${r[1]}</span></div>`).join('')}</div>`;
+  };
+  return `<p class="who"><span class="pill">Administrateur</span> Ousmane CAMARA</p>
+    <div class="stats">
+      <button class="stat${PENDING.length?' hot':''}" data-act="atab" data-tab="verifier"><b>${PENDING.length}</b><span>À vérifier</span></button>
+      <div class="stat"><b>${vis.length}</b><span>Ouvriers visibles</span></div>
+      <div class="stat"><b>${entVis}</b><span>Entreprises vérifiées</span></div>
+      <div class="stat"><b>${susp}</b><span>Comptes suspendus</span></div>
+    </div>
+    <section class="sec"><h2 class="sec-title">Ouvriers par ville</h2>${bars(byV)}</section>
+    <section class="sec"><h2 class="sec-title">Ouvriers par branche</h2>${bars(byB)}</section>
+    <p class="fine">Prototype : ces chiffres viennent des ouvriers d'exemple. Dans la vraie application, ils viendront de la vraie liste d'inscrits.</p>`;
+}
+function pendingHtml(){
+  if(!PENDING.length) return `<div class="empty"><h3>Rien à vérifier</h3><p>Tous les profils reçus ont été traités.</p></div>`;
+  return `<p class="lead">Regardez les documents reçus (pièce d'identité et photos pour un ouvrier, document pour une entreprise), puis validez ou refusez chaque demande.</p>
+    <div class="list">${PENDING.map(p=>{
+      const ent=p.type==='entreprise';
+      return `<article class="pend">
+      <div class="pend-head">${ent?`<span class="avatar co">${ic('building',24)}</span>`:`<span class="avatar">${esc(initials(p.nom))}</span>`}
+        <div class="pend-id"><b>${esc(p.nom)}</b>${ent
+          ?`<span>Entreprise · ${esc(secteurNom(p.secteur))}, ${esc(villeObj(p.ville).nom)}</span><span>Responsable : ${esc(p.resp)}</span><span>Téléphone : ${esc(p.tel||'non donné')}</span>`
+          :`<span>${metierNom(p.metier)} · ${esc(p.quartier)}, ${esc(villeObj(p.ville).nom)}</span><span>Téléphone : ${esc(p.tel||'non donné')}</span>`}</div></div>
+      <div class="docs">${ent
+        ?`<span class="doc ok">${ic('shield',16)}Document de l'entreprise reçu</span>`
+        :`<span class="doc ok">${ic('shield',16)}Pièce d'identité reçue</span>
+        <span class="doc ${p.photos?'ok':'no'}">${p.photos?`${p.photos} photo${p.photos>1?'s':''} de chantier`:`Aucune photo de chantier`}</span>`}</div>
+      <div class="field"><label for="r-${p.id}">Motif si vous refusez</label>
+        <select id="r-${p.id}" class="input">${(ent?COREASONS:REASONS).map(r=>`<option>${esc(r)}</option>`).join('')}</select></div>
+      <div class="pend-actions"><button class="btn btn-primary" data-act="approve" data-pid="${p.id}">Valider</button><button class="btn btn-ghost" data-act="reject" data-pid="${p.id}">Refuser</button></div>
+    </article>`;}).join('')}</div>`;
+}
+function entreprisesHtml(){
+  if(!ENTREPRISES.length) return `<div class="empty"><h3>Aucune entreprise</h3><p>Les entreprises vérifiées apparaissent ici.</p></div>`;
+  return `<p class="count">${ENTREPRISES.length} entreprise${ENTREPRISES.length>1?'s':''}</p>
+    <div class="list">${ENTREPRISES.map(e=>`<div class="arow">
+      <span class="avatar sm co">${ic('building',20)}</span>
+      <span class="arow-main"><b>${esc(e.nom)}</b><span>${esc(secteurNom(e.secteur))} · ${esc(villeObj(e.ville).nom)}</span><span>Responsable : ${esc(e.resp)}</span></span>
+      <span class="arow-act"><span class="state${e.suspendu?' off':''}">${e.suspendu?'Suspendue':'Vérifiée'}</span>
+        <button class="btn btn-ghost btn-sm" data-act="togglec" data-id="${e.id}">${e.suspendu?'Réactiver':'Suspendre'}</button></span>
+    </div>`).join('')}</div>`;
+}
+function adminRowsHtml(){
+  const nq=norm(af.q);
+  const l=OUVRIERS.filter(o=>(!af.ville||o.ville===af.ville)&&(!nq||norm(o.nom+' '+metierNom(o.metier)+' '+o.quartier).includes(nq)));
+  if(!l.length) return `<div class="empty"><h3>Aucun ouvrier</h3><p>Essayez une autre ville ou un autre nom.</p></div>`;
+  return `<p class="count">${l.length} ouvrier${l.length>1?'s':''}${l.length>40?', 40 affichés':''}</p>
+    <div class="list">${l.slice(0,40).map(o=>`<div class="arow">
+      <span class="avatar sm">${esc(initials(o.nom))}</span>
+      <span class="arow-main"><b>${esc(o.nom)}</b><span>${metierNom(o.metier)} · ${esc(o.quartier)}, ${esc(villeObj(o.ville).nom)}</span></span>
+      <span class="arow-act"><span class="state${o.suspendu?' off':''}">${o.suspendu?'Suspendu':'Visible'}</span>
+        <button class="btn btn-ghost btn-sm" data-act="toggle" data-id="${o.id}">${o.suspendu?'Réactiver':'Suspendre'}</button></span>
+    </div>`).join('')}</div>`;
+}
+function ouvriersHtml(){
+  return `<div class="filters afilters">
+      <div class="field"><label for="aVille">Ville</label>
+        <select id="aVille" class="input"><option value="">Toutes</option>${VILLES.map(v=>`<option value="${v.id}"${af.ville===v.id?' selected':''}>${esc(v.nom)}</option>`).join('')}</select></div>
+      <div class="field"><label for="aQ">Nom ou métier</label>
+        <input id="aQ" class="input" type="search" value="${esc(af.q)}" autocomplete="off"></div>
+    </div>
+    <div id="arows">${adminRowsHtml()}</div>`;
+}
+function vAdmin(tb){
+  if(!admin) return vAdminLogin();
+  const t=tb||'resume';
+  const top=titleBar('Administration',`<button class="btn btn-ghost btn-sm" data-act="aquit">Quitter</button>`);
+  if(t==='verifier') return {top,body:pendingHtml(),dock:adminTabs('verifier')};
+  if(t==='ouvriers') return {top,body:ouvriersHtml(),dock:adminTabs('ouvriers')};
+  if(t==='entreprises') return {top,body:`<div id="erows">${entreprisesHtml()}</div>`,dock:adminTabs('entreprises')};
+  return {top,body:resumeHtml(),dock:adminTabs('resume')};
+}
+
+/* ---------- Affichage ---------- */
+function render(){
+  const v=cur.view, p=cur.params;
+  let r;
+  if(v==='home') r=vHome();
+  else if(v==='list') r=vList();
+  else if(v==='profile') r=vProfile(p.id);
+  else if(v==='chat') r=vChat(p.id);
+  else if(v==='messages') r=vMessages();
+  else if(v==='metiers') r=vMetiers();
+  else if(v==='adminlogin') r=vAdminLogin();
+  else if(v==='admin') r=vAdmin(p.tab);
+  else if(v==='rate') r=vRate(p.id);
+  else r=vJoin();
+  if(!r){cur={view:'home',params:{}};stack=[];return render();}
+  document.body.classList.toggle('home',v==='home');
+  const top=$('#top'), dock=$('#dock');
+  top.className='top pad'+(v==='home'?' hero':'');
+  top.innerHTML=r.top;
+  $('#screen').innerHTML=r.body;
+  dock.innerHTML=r.dock||'';
+  dock.hidden=!r.dock;
+  window.scrollTo(0,0);
+  if(v==='chat'&&chat(p.id).msgs.length) window.scrollTo({top:document.documentElement.scrollHeight});
+}
+
+let toastTimer;
+function toast(m){
+  const t=$('#toast'); t.textContent=m; t.hidden=false;
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>{t.hidden=true},2600);
+}
+
+/* ---------- Actions ---------- */
+const A={
+  back:()=>back(),
+  tab:el=>{if(el.dataset.view==='join') joinType=''; tab(el.dataset.view);},
+  jtype:el=>{joinType=el.dataset.t||'';stack=[];cur={view:'join',params:{}};render();},
+  trade:el=>{resetFilters();filters.metier=el.dataset.id;go('list');},
+  all:()=>{resetFilters();go('list');},
+  metiers:()=>go('metiers'),
+  joinAs:el=>{joinPrefill=el.dataset.id;joinType='ouvrier';tab('join');},
+  open:el=>go('profile',{id:+el.dataset.id}),
+  contact:el=>go('chat',{id:+el.dataset.id}),
+  chat:el=>go('chat',{id:+el.dataset.id}),
+  rate:el=>{rateN=0;go('rate',{id:+el.dataset.id});},
+  star:el=>setStars(+el.dataset.n),
+  quick:el=>sendMsg(cur.params.id,el.dataset.text),
+  clearq:()=>{filters.q='';render();},
+  reset:()=>{resetFilters();render();},
+  validate:()=>{
+    if(me&&me.pid) approve(me.pid);
+    render();
+  },
+  retry:()=>{me=null;joinType='ouvrier';render();},
+  retryCo:()=>{co=null;joinType='entreprise';render();},
+  validateCo:()=>{
+    if(co&&co.status==='attente') approve('pc');
+    render();
+  },
+  fav:el=>{
+    if(!coOk()) return;
+    const id=+el.dataset.id, i=co.fav.indexOf(id);
+    if(i>=0) co.fav.splice(i,1); else co.fav.push(id);
+    el.outerHTML=favBtn(id);
+    toast(i>=0?`Retiré de vos favoris.`:`Ajouté à vos favoris. Retrouvez-le dans Mon compte.`);
+  },
+  togglec:el=>{
+    const e=ENTREPRISES.find(x=>x.id===+el.dataset.id); if(!e) return;
+    e.suspendu=!e.suspendu;
+    const box=$('#erows'); if(box) box.innerHTML=entreprisesHtml();
+    toast(e.suspendu?`${e.nom} est suspendue.`:`${e.nom} est de nouveau active.`);
+  },
+  alogin:()=>{if(admin){stack=[];cur={view:'admin',params:{tab:'resume'}};render();}else go('adminlogin');},
+  aquit:()=>{admin=false;tab('home');},
+  atab:el=>{stack=[];cur={view:'admin',params:{tab:el.dataset.tab}};render();},
+  approve:el=>{
+    const o=approve(el.dataset.pid);
+    if(o) toast(o.kind==='entreprise'?`${o.nom} est validée. Elle a le badge Entreprise vérifiée.`:`${o.nom} est validé et visible dans la recherche.`);
+    render();
+  },
+  reject:el=>{
+    const pid=el.dataset.pid, sel=document.getElementById('r-'+pid);
+    const p=PENDING.find(x=>x.id===pid);
+    reject(pid,sel?sel.value:'Autre raison');
+    if(p) toast(`Le profil de ${p.nom} est refusé.`);
+    render();
+  },
+  toggle:el=>{
+    const o=byId(+el.dataset.id); if(!o) return;
+    o.suspendu=!o.suspendu;
+    const box=$('#arows'); if(box) box.innerHTML=adminRowsHtml();
+    toast(o.suspendu?`${o.nom} est suspendu. Il n'apparaît plus dans la recherche.`:`${o.nom} est de nouveau visible.`);
+  },
+  seeMine:()=>{
+    resetFilters(); ville=me.ville; filters.metier=me.metier; filters.quartier=me.quartier;
+    go('list');
+  }
+};
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-act]'); if(!el) return;
+  const f=A[el.dataset.act]; if(f) f(el);
+});
+
+document.addEventListener('change',e=>{
+  const tg=e.target;
+  if(tg.id==='villeSel'){ville=tg.value;filters.quartier='';render();return;}
+  if(tg.id==='jVille'){joinVille=tg.value;const q=$('#jQuartier');if(q)q.innerHTML=quartierOpts(tg.value);return;}
+  if(tg.id==='aVille'){af.ville=tg.value;const b=$('#arows');if(b)b.innerHTML=adminRowsHtml();return;}
+  const k=tg.dataset&&tg.dataset.filter; if(!k) return;
+  filters[k]=e.target.value;
+  const res=$('#results'); if(res) res.innerHTML=resultsHtml();
+  const t=$('.top-title'); if(t) t.textContent=listTitle();
+});
+
+document.addEventListener('input',e=>{
+  if(e.target.id==='aQ'){af.q=e.target.value;const b=$('#arows');if(b)b.innerHTML=adminRowsHtml();}
+});
+
+document.addEventListener('submit',e=>{
+  e.preventDefault();
+  const id=e.target.id;
+  if(id==='searchForm'){
+    const q=$('#q').value.trim();
+    resetFilters(); filters.q=q; go('list');
+  } else if(id==='chatForm'){
+    const inp=$('#chatInput'); const t=inp.value; inp.value='';
+    sendMsg(cur.params.id,t);
+  } else if(id==='joinForm'){
+    const f=e.target, d=f.elements;
+    const bad={
+      nom:!d.nom.value.trim(),
+      metier:!d.metier.value,
+      quartier:!d.quartier.value,
+      tel:d.tel.value.replace(/\D/g,'').length<8,
+      piece:!(d.piece.files&&d.piece.files.length)
+    };
+    let first=null;
+    Object.keys(bad).forEach(k=>{
+      const m=f.querySelector('.err[data-for="'+k+'"]'); if(m) m.hidden=!bad[k];
+      if(bad[k]&&!first) first=d[k];
+    });
+    if(first){first.focus();return;}
+    me={nom:d.nom.value.trim(),metier:d.metier.value,ville:d.ville.value,quartier:d.quartier.value,
+        photos:d.photos.files?d.photos.files.length:0,status:'attente',workerId:null,pid:'pm'};
+    PENDING.unshift({id:'pm',nom:me.nom,metier:me.metier,ville:me.ville,quartier:me.quartier,tel:d.tel.value.trim(),photos:me.photos,mine:true});
+    render();
+  } else if(id==='coForm'){
+    const f=e.target, d=f.elements;
+    const bad={
+      nom:!d.nom.value.trim(),
+      secteur:!d.secteur.value,
+      resp:!d.resp.value.trim(),
+      tel:d.tel.value.replace(/\D/g,'').length<8,
+      doc:!(d.doc.files&&d.doc.files.length)
+    };
+    let first=null;
+    Object.keys(bad).forEach(k=>{
+      const m=f.querySelector('.err[data-for="'+k+'"]'); if(m) m.hidden=!bad[k];
+      if(bad[k]&&!first) first=d[k];
+    });
+    if(first){first.focus();return;}
+    co={nom:d.nom.value.trim(),secteur:d.secteur.value,ville:d.ville.value,resp:d.resp.value.trim(),
+        status:'attente',coId:null,fav:[],team:[]};
+    PENDING.unshift({id:'pc',type:'entreprise',nom:co.nom,secteur:co.secteur,ville:co.ville,resp:co.resp,tel:d.tel.value.trim(),mine:true});
+    render();
+  } else if(id==='teamForm'){
+    const inp=$('#tName'), n=inp.value.trim();
+    if(!n){inp.focus();return;}
+    if(co) co.team.push(n);
+    const box=$('#teamBox'); if(box) box.innerHTML=teamHtml();
+    inp.value=''; inp.focus();
+    toast(`${n} est ajouté à l'équipe.`);
+  } else if(id==='adminForm'){
+    const c=$('#aCode').value.trim().toLowerCase();
+    if(c==='baara'){admin=true;stack=[];cur={view:'admin',params:{tab:'resume'}};render();}
+    else{const er=$('#aErr');if(er)er.hidden=false;}
+  } else if(id==='rateForm'){
+    if(rateN<1) return;
+    const o=byId(cur.params.id); if(!o) return;
+    const comment=$('#rComment').value.trim();
+    o.note=(o.note*o.nb+rateN)/(o.nb+1);
+    o.nb+=1;
+    o.avis.unshift([`Vous`,rateN,comment]);
+    toast(`Merci, votre avis est publié.`);
+    if(stack.length&&stack[stack.length-1].view==='profile'&&stack[stack.length-1].params.id===o.id) stack.pop();
+    cur={view:'profile',params:{id:o.id}};
+    render();
+  }
+});
+
+render();
+})();
+</script>
+
+</body>
+</html>
